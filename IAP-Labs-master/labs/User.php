@@ -74,6 +74,25 @@
       return null;
     }
 
+    //lab 2 phase 1
+    public function validateForm(){
+      //return true if the values are not empty
+      $fn = $this->first_name;
+      $ln = $this->last_name;
+      $city = $this->city_name;
+
+      if($fn =="" || $ln == "" || $city == ""){
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    public function createFormErrorSessions(){
+      session_start();
+      $_SESSION['form_errors'] = "All fields are required";
+    }
+
   }
 
 
