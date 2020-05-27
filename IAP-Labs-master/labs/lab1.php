@@ -2,15 +2,17 @@
   include_once 'DBConnector.php';
   include_once 'User.php';
 
-
+  $con = new DBConnector;
 
   if (isset($_POST['btn-save'])) {
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
     $city_name = $_POST['city_name'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
 //create a user object
-    $user = new User($first_name, $last_name, $city_name);
+    $user = new User($first_name, $last_name, $city_name, $username, $password);
 
 //lab 2
     if(!$user->validateForm()){
@@ -83,9 +85,22 @@
           <td><input type="text" name="city_name" required placeholder="City"/></td>
         </tr>
 
+        <!-- lab 2 part 2 -->
         <tr>
-          <td><button type="submit" name="btn-save"><strong>SAVE</strong></button></td>
+          <td><input type="text" name="username" required placeholder="username"/></td>
         </tr>
+
+        <tr>
+          <td><input type="text" name="password" required placeholder="Password"/></td>
+        </tr>
+
+        <tr>
+          <td><button type="submit" name="btn-save" required placeholder = "Submit">Add Records</button><a href = "login.php"></a></td>
+        </tr>
+
+       <!-- <tr>
+          <td><a href = "login.php">Login</a></td>
+        </tr> -->
 
       </table>
     </form>
