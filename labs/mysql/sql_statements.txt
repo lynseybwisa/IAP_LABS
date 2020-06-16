@@ -1,0 +1,18 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+Database: 'ics3205'
+
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(32) NOT NULL,
+  `last_name` varchar(32) DEFAULT NULL,
+  `user_city` varchar(32) DEFAULT NULL,
+  `username` varchar(20) DEFAULT NULL,
+  `password` text DEFAULT NULL,
+  `filename` varchar(255) NOT NULL,
+  `uct_timestamp` varchar(255) NOT NULL,
+  `offset` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
