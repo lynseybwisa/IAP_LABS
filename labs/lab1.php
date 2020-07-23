@@ -7,10 +7,14 @@
     $city = '';
     $uname = '';
     $pass = '';
+    $utc_timestamp = '';
     $data = '';
+    $offset = '';
+    
 
-$user = new User($first_name,$last_name,$city,$uname,$pass,$data);
+    $user = new User($first_name,$last_name,$city,$uname,$pass,$data,$utc_timestamp,$offset);
     $conn = new DBConnector();
+    
 
     if (isset($_POST['btn-save'])) {
         $first_name = $_POST['first_name'];
@@ -18,14 +22,17 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
         $city = $_POST['city_name'];
         $username = $_POST['username'];
         $password = $_POST['password'];
+        $utc_timestamp = $_POST['utc_timestamp'];
+        $offset = $_POST['time_zone_offset'];
         $data = $_FILES['filetoUpload'];
+        // die($data["name"]);
 
-    //Creating a new user object
-        $user = new User($first_name,$last_name,$city,$username,$password,$data);
+        //Creating a new user object
+        $user = new User($first_name,$last_name,$city,$username,$password,$data,$utc_timestamp,$offset);
         //Create the object for File Uploader
         $uploader = new FileUploader($data);
 
-    if (!$user->validateForm()) {
+        if (!$user->validateForm()) {
             $user->createFormErrorSessions();
             header("Refresh:0");
             return;
@@ -36,10 +43,13 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
         }else{
             $res = $user->save();
         }
+        
+        
+       
+        $file_upload_response = $uploader->uploadFile();
+        
 
-     $file_upload_response = $uploader->uploadFile();
-
-     //Check if the operation occured succesfully
+        //Check if the operation occured succesfully
         if ($res && $file_upload_response === TRUE) {
             $message = "Save Operation Was Succesful";
         }else{
@@ -48,14 +58,14 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
         $conn->closeDatabase();
     }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Lab 1</title>
+    <meta name="author" content="Trevor Saudi">
+    <title>Lab01</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.3/examples/floating-labels/">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">    
@@ -71,7 +81,7 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
         user-select: none;
       }
 
-@media (min-width: 768px) {
+      @media (min-width: 768px) {
         .bd-placeholder-img-lg {
           font-size: 3.5rem;
         }
@@ -83,8 +93,8 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
     
 </head>
 <body>
-
-<form class="form-signin" method="post" style="margin-left:100px;margin-right:200px;" 
+     
+    <form class="form-signin" method="post" style="margin-left:100px;margin-right:200px;" 
         name="user_details" id="user_details" onsubmit="return validateForm()" 
             action="<?=$_SERVER['PHP_SELF']?>" enctype="multipart/form-data">
 
@@ -95,16 +105,18 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
                 session_start();
                 if(!empty($_SESSION['form_errors'])){
                     echo " ".$_SESSION['form_errors']."<br/><br/>";
-    
+                    
                     unset($_SESSION['form_errors']);
                 }
             ?>
         </div>
+        
+            <img style="margin-bottom:30px;" width="70%" height="70%" src="images/logo-1.png" alt="">
+            </div>
+            
+        </div>
 
-    </div>
-
-
-<div class="form-label-group">
+        <div class="form-label-group">
         <label for="inputEmail">First Name</label>
             <input name="first_name" type="text" id="inputEmail" class="form-control" placeholder="First Name" autofocus>
            
@@ -127,7 +139,6 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
             <input name="username" type="text" id="inputUsername" class="form-control" placeholder="Username">
         
         </div>
-
         <div class="form-label-group">
         <label for="inputPassword1">Password</label>
             <input name="password" type="password" id="inputPassword1" class="form-control" placeholder="Password">
@@ -143,10 +154,12 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
         
         <button name="btn-save" class="btn btn-primary" type="submit">SAVE</button>
         <a class="btn btn-primary" href="login.php" role="button">LOGIN</a>
-
+        
+        <input type="hidden" name="utc_timestamp" id="utc_timestamp" value="">
+        <input type="hidden" name="time_zone_offset" id="time_zone_offset" value="">
     </form>
 
-<div>
+    <div>
     <div id="form-error">
         <?php
             if (isset($message)) {
@@ -161,37 +174,9 @@ $user = new User($first_name,$last_name,$city,$uname,$pass,$data);
                 ';
             }
         ?>
-    </div> 
-
-<table id="example" style="padding-left:-100px;" class="table">
-            <thead class="thead-dark">
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">City Name</th>
-                <th scope="col">Username</th>
-            </tr> 
-            </thead>
-            <tbody>
-                <?php
-                    $result = $user->readAll();
-                    if($result->num_rows > 0){
-                        while($row = $result->fetch_array()){
-                            echo "<tr>";
-                                echo "<td>" . $row['id'] . "</td>";
-                                echo "<td>" . $row['first_name'] . "</td>";
-                                echo "<td>" . $row['last_name'] . "</td>";
-                                echo "<td>" . $row['user_city'] . "</td>";
-                                echo "<td>" . $row['username'] . "</td>";
-                            echo "</tr>";
-                        }
-                    }
-                ?>
-            </tbody>
-
-</table>
-</div>
+    </div>  
+        
+    </div>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
