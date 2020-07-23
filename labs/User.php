@@ -2,7 +2,6 @@
     include "Crud.php";
     include "authenticator.php";
     include_once "DBConnector.php";
-    
     class User implements Crud{
         private $user_id;
         private $first_name;
@@ -13,26 +12,35 @@
         private $username;
         private $password;
         private $data;
+        private $utc_timestamp;
+        private $offset;
         
-    // We can use our constructor to initialize our values
+
+        // We can use our constructor to initialize our values
         // member variables cannot be instantiated from elsewhere; They private;
-        function __construct($first_name,$last_name,$city_name,$username,$password,$data){
+        function __construct($first_name,$last_name,$city_name,$username,$password,$data,$utc_timestamp,$offset){
             $this->first_name = $first_name;
             $this->last_name = $last_name;
             $this->city_name = $city_name;
             $this->username = $username;
             $this->password = $password;
             $this->data = $data;
+            $this->utc_timestamp = $utc_timestamp;
+            $this->offset = $offset;
             $this->con = new DBConnector();
             // $this->conn = $this->conn->conn;
         }
 
-     public static function create(){
-            $instance = new self(null,null,null,null,null,null);
+        /**
+         * Static Constructor
+         */
+
+        public static function create(){
+            $instance = new self(null,null,null,null,null,null,null,null);
             return $instance;
         }
-
- // user_id setter
+        
+        // user_id setter
         public function setUserId($user_id){
             $this->user_id = $user_id;
         }
@@ -60,7 +68,11 @@
             return $this->password;
         }
 
-public function save(){
+        // Because we implemented the Crud interface we have to define all the methods
+        // otherwise it will run into an error
+        // For now we will implement save() and readAll() functions and return null in
+        // the other ones
+        public function save(){
             $fn = $this->first_name;
             $ln = $this->last_name;
             $city = $this->city_name;
@@ -68,22 +80,23 @@ public function save(){
             $this->hashPassword();
             $pass = $this->password;
             $filename = $this->data['name'];
-            
-            $sql = "INSERT INTO user(first_name,last_name,user_city,username,password,filename)
-                     VALUES('$fn','$ln','$city','$uname','$pass','$filename')";
+            $utc_timestamp = $this->utc_timestamp;
+            $offset = $this->offset;
+            $sql = "INSERT INTO user(first_name,last_name,user_city,username,password,filename,uct_timestamp,offset)
+                     VALUES('$fn','$ln','$city','$uname','$pass','$filename','$utc_timestamp','$offset')";
             // die(print_r($sql));
-            $res = mysqli_query($this->con->conn,$sql) or die("Error " .mysqli_error($con->conn));
-
-             return $res;
+            $res = mysqli_query($this->con->conn,$sql) or die("Error " .mysqli_error($con->conn));    
+      
+            // die(print_r($sql));
+            
+            return $res;
         }
-
         public function readAll(){
             $sql = "SELECT * FROM user";
             $res = mysqli_query($this->con->conn,$sql) or die("Error " .mysqli_error($con->conn));    
       
             return $res;
         }
-
         public function readUnique(){return null;}
         public function search(){return null;}
         public function update(){return null;}
@@ -115,7 +128,7 @@ public function save(){
             $this->password = password_hash($this->password,PASSWORD_DEFAULT);
         }
 
-         public function isPasswordCorrect(){
+        public function isPasswordCorrect(){
             $found = false;
             $sql = "SELECT * FROM user";
             // $result = $this->conn->getConnection()->query($sql);
@@ -149,7 +162,7 @@ public function save(){
             unset($_SESSION['username']);
             unset($_SESSION['id']);
             session_destroy();
-            header('location:lab1.php');
+            header('location:index.php');
         }
 
         public function isUserExists($username){
