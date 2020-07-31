@@ -1,12 +1,6 @@
 # IAP-Labs
 
-Lab 1 completed.
-
-Lab 2 in progress
-
-Lab 2 Part 1 completed
-
-Lab 2 Part 2 completed
+LAB 1-5 COMPLETED
 
 
 Now with JS disabled in your browser, try submitting an empty file. What do you notice?
